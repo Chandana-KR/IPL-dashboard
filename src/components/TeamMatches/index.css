@@ -60,6 +60,17 @@
   padding-left: 0;
   margin-top: 24px;
 }
+.back-button {
+  width: 100px;
+  padding: 10px;
+  border-width: 0px;
+  cursor: pointer;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
 
 @media screen and (min-width: 768px) {
   .recent-matches-list {

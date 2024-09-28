@@ -1,5 +1,6 @@
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
+import {PieChart} from 'recharts'
 
 import LatestMatch from '../LatestMatch'
 import MatchCard from '../MatchCard'
@@ -10,7 +11,7 @@ const teamMatchesApiUrl = 'https://apis.ccbp.in/ipl/'
 
 class TeamMatches extends Component {
   state = {
-    isLoading: true,
+    isProgress: true,
     teamMatchesData: {},
   }
 
@@ -33,7 +34,7 @@ class TeamMatches extends Component {
   })
 
   getTeamMatches = async () => {
-    this.setState({isLoading: true})
+    this.setState({isProgress: true})
     const {match} = this.props
     const {params} = match
     const {id} = params
@@ -48,7 +49,12 @@ class TeamMatches extends Component {
       ),
     }
 
-    this.setState({teamMatchesData: formattedData, isLoading: false})
+    this.setState({teamMatchesData: formattedData, isProgress: false})
+  }
+
+  onBackButton = () => {
+    const {history} = this.props
+    history.replace('/')
   }
 
   renderRecentMatchesList = () => {
@@ -64,21 +70,48 @@ class TeamMatches extends Component {
     )
   }
 
+  getNoOfMatches = value => {
+    const {teamMatchesData} = this.state
+    const {latestMatch, recentMatches} = teamMatchesData
+    const currentMatch = value === latestMatch.matchStatus ? 1 : 0
+    const result =
+      recentMatches.filter(match => match.matchStatus === value).length +
+      currentMatch
+    return result
+  }
+
+  generatePieChartData = () => [
+    {name: 'Won', value: this.getNoOfMatches('Won')},
+    {name: 'Lost', value: this.getNoOfMatches('Lost')},
+    {name: 'Drawn', value: this.getNoOfMatches('Drawn')},
+  ]
+
   renderTeamMatches = () => {
     const {teamMatchesData} = this.state
     const {teamBannerURL, latestMatch} = teamMatchesData
 
+    console.log(teamMatchesData)
     return (
       <div className="responsive-container">
         <img src={teamBannerURL} alt="team banner" className="team-banner" />
         <LatestMatch latestMatchData={latestMatch} />
         {this.renderRecentMatchesList()}
+
+        <PieChart data={this.generatePieChartData()} />
+
+        <button
+          type="button"
+          className="back-button"
+          onClick={this.onBackButton}
+        >
+          Back
+        </button>
       </div>
     )
   }
 
   renderLoader = () => (
-    <div data-testid="loader" className="loader-container">
+    <div data-testid="loader">
       <Loader type="Oval" color="#ffffff" height={50} />
     </div>
   )
@@ -111,13 +144,15 @@ class TeamMatches extends Component {
   }
 
   render() {
-    const {isLoading} = this.state
+    const {isProgress} = this.state
     const className = `team-matches-container ${this.getRouteClassName()}`
 
     return (
-      <div className={className}>
-        {isLoading ? this.renderLoader() : this.renderTeamMatches()}
-      </div>
+      <>
+        <div className={className}>
+          {isProgress ? this.renderLoader() : this.renderTeamMatches()}
+        </div>
+      </>
     )
   }
 }
